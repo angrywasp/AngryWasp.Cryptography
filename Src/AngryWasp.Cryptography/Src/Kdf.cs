@@ -1,3 +1,4 @@
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 
@@ -14,7 +15,7 @@ namespace AngryWasp.Cryptography
 
         public static byte[] Hash(byte[] message, byte[] salt, int iterations, int keySize)
         {
-            Pkcs5S2ParametersGenerator kdf = new Pkcs5S2ParametersGenerator();
+            Pkcs5S2ParametersGenerator kdf = new Pkcs5S2ParametersGenerator(new KeccakDigest(keySize));
             kdf.Init(message, salt, iterations);
             return ((KeyParameter)kdf.GenerateDerivedMacParameters(keySize)).GetKey();
         }
