@@ -10,6 +10,8 @@ namespace AngryWasp.Cryptography
     public static class Ecc
     {
         private const string ALGORITHM = "secp256k1";
+        private const string SIGNING_ALGORITHM = "SHA-256withECDSA";
+
         public static byte[] GetPublicKeyFromPrivateKey(byte[] privateKey = null)
         {
             if (privateKey == null)
@@ -23,7 +25,7 @@ namespace AngryWasp.Cryptography
             return publicKey.Q.GetEncoded();
         }
 
-        public static void GenerateKeyPair(out byte[] publicKey, out byte[] privateKey)
+        public static (byte[] PublicKey, byte[] PrivateKey) GenerateKeyPair()
         {
             var curve = SecNamedCurves.GetByName(ALGORITHM);
             var domain = new ECDomainParameters(curve.Curve, curve.G, curve.N, curve.H);
@@ -31,15 +33,10 @@ namespace AngryWasp.Cryptography
             keyPairGenerator.Init(new ECKeyGenerationParameters(domain, new SecureRandom()));
             var pair = keyPairGenerator.GenerateKeyPair();
 
-            { //Public Key
-                ECPublicKeyParameters p = (ECPublicKeyParameters)pair.Public;
-                publicKey = p.Q.GetEncoded();
-            }
+            var publicKey = ((ECPublicKeyParameters)pair.Public).Q.GetEncoded();
+            var privateKey = ((ECPrivateKeyParameters)pair.Private).D.ToByteArray();
 
-            { //Private Keys
-                ECPrivateKeyParameters p = (ECPrivateKeyParameters)pair.Private;
-                privateKey = p.D.ToByteArray();
-            }
+            return (publicKey, privateKey);
         }
 
         public static byte[] Sign(byte[] input, byte[] privateKey)
@@ -48,7 +45,7 @@ namespace AngryWasp.Cryptography
             var domain = new ECDomainParameters(curve.Curve, curve.G, curve.N, curve.H);
             var keyParameters = new ECPrivateKeyParameters(new BigInteger(privateKey), domain);
 
-            ISigner signer = SignerUtilities.GetSigner("SHA-256withECDSA");
+            ISigner signer = SignerUtilities.GetSigner(SIGNING_ALGORITHM);
             signer.Init(true, keyParameters);
             signer.BlockUpdate(input, 0, input.Length);
             return signer.GenerateSignature();
@@ -63,7 +60,7 @@ namespace AngryWasp.Cryptography
                 var q = curve.Curve.DecodePoint(publicKey);
                 var keyParameters = new ECPublicKeyParameters(q, domain);
 
-                ISigner signer = SignerUtilities.GetSigner("SHA-256withECDSA");
+                ISigner signer = SignerUtilities.GetSigner(SIGNING_ALGORITHM);
                 signer.Init(false, keyParameters);
                 signer.BlockUpdate(input, 0, input.Length);
                 return signer.VerifySignature(signature);
