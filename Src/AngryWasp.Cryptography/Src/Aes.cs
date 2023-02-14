@@ -7,14 +7,13 @@ namespace AngryWasp.Cryptography
     public static class Aes
     {
         private const int keySize = 128;
-        private const int derivationIterations = 2048;
 
-        public static byte[] Encrypt(byte[] input, byte[] key)
+        public static byte[] Encrypt(byte[] input, byte[] key, int kdfIterations = 2048)
         {
             var saltStringBytes = Helper.GenerateSecureBytes(keySize / 8);
             var ivStringBytes = Helper.GenerateSecureBytes(keySize / 8);
 
-            var keyBytes = Kdf.Hash128(key, saltStringBytes);
+            var keyBytes = Kdf.Hash128(key, saltStringBytes, kdfIterations);
 
             using (var symmetricKey = System.Security.Cryptography.Aes.Create())
             {
@@ -37,7 +36,7 @@ namespace AngryWasp.Cryptography
             }
         }
 
-        public static bool Decrypt(byte[] input, byte[] key, out byte[] decrypted)
+        public static bool Decrypt(byte[] input, byte[] key, out byte[] decrypted, int kdfIterations = 2048)
         {
             try
             {
@@ -45,7 +44,7 @@ namespace AngryWasp.Cryptography
                 var ivStringBytes = input.Skip(keySize / 8).Take(keySize / 8).ToArray();
                 var cipherTextBytes = input.Skip((keySize / 8) * 2).ToArray();
 
-                var keyBytes = Kdf.Hash128(key, saltStringBytes);
+                var keyBytes = Kdf.Hash128(key, saltStringBytes, kdfIterations);
 
                 using (var symmetricKey = System.Security.Cryptography.Aes.Create())
                 {
