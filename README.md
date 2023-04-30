@@ -4,6 +4,7 @@ Random cryptographic helpers
 
 AES  
 ECC  
+kdf  
 Keccak  
 RSA  
 
