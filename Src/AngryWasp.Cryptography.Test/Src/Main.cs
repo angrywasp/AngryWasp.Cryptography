@@ -8,6 +8,13 @@ public class MainClass
     const string TEST_STRING = "Hello world, this is a random test string that we will attempt to encrypt and decrypt";
 
     [Fact]
+    public void KeyTest()
+    {
+        var (pubKey, privKey) = Ecc.GenerateKeyPair();
+        Assert.True(pubKey.SequenceEqual(Ecc.GetPublicKeyFromPrivateKey(privKey)));
+    }
+
+    [Fact]
     public void AesTest()
     {
         var password = Encoding.ASCII.GetBytes("12345");

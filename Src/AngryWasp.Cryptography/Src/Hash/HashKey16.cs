@@ -14,7 +14,7 @@ namespace AngryWasp.Cryptography
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            HashKey16 hk = ((string)reader.Value).FromByteHex();
+            HashKey16 hk = ((string)reader.Value).FromHex();
             return hk;
         }
 
@@ -119,7 +119,7 @@ namespace AngryWasp.Cryptography
 
         public static implicit operator HashKey16(List<byte> value) => new HashKey16(value.ToArray());
 
-        public static implicit operator HashKey16(string hex) => new HashKey16(hex.FromByteHex());
+        public static implicit operator HashKey16(string hex) => new HashKey16(hex.FromHex());
 
         public override string ToString() => value.ToHex();
 
